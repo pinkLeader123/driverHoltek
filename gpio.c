@@ -93,7 +93,7 @@ void Gpio_Init(unsigned char port, unsigned char pin, unsigned char direction, u
         }
         switch (pull_up) {
             case PULL_UP_ON:
-                _pdpu |= mark_pin; // Lưu ý: giữ nguyên tên biến _dcpu theo code gốc của bạn
+                _pdpu |= mark_pin; 
                 break;
             case PULL_UP_OFF:
                 _pdpu &= ~mark_pin;

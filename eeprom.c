@@ -49,11 +49,43 @@ void EEPROM_WriteByte(unsigned char addr, unsigned char data) {
 }
 
 void EEPROM_WriteProtectEnable(void){
+    // 1. Trỏ con trỏ bộ nhớ MP1 tới thanh ghi EEC tại Sector 1 (Địa chỉ 0x140)
+    _mp1h = 0x01;
+    _mp1l = EEC_ADDR_SECTOR1;
+
+    // 2. Xóa bit WREN (Bit 3) về 0 qua thanh ghi gián tiếp IAR1
+    _iar1 &= (unsigned char)(~EEC_WREN_BIT);
+
+    // 3. Trả con trỏ bộ nhớ về Sector 0 để đảm bảo an toàn cho các tác vụ khác
+    _mp1h = 0x00;
 
 }
 void EEPROM_WriteProtectDisable(void){
+    _mp1h = 0x01;
+    _mp1l = EEC_ADDR_SECTOR1;
 
+    // 2. Bật bit WREN (Bit 3) lên 1 qua thanh ghi gián tiếp IAR1
+    _iar1 |= (unsigned char)EEC_WREN_BIT;
+
+    // 3. Trả con trỏ bộ nhớ về Sector 0
+    _mp1h = 0x00;
 }
 void EEPROM_WriteInterruptEnable(void){
-    
+    _def = 0;   // Xóa cờ ngắt EEPROM tồn đọng trong INTC2
+    _dee = 1;   // Bật bit cho phép ngắt Data EEPROM (Bit 1 trong INTC2)
+    _emi = 1;   // Cho phép ngắt toàn cục (INTC0)
+}
+
+/**
+ * @brief Vô hiệu hóa ngắt ghi EEPROM
+ */
+void EEPROM_WriteInterruptDisable(void) {
+    _dee = 0;   // Tắt bit ngắt Data EEPROM trong INTC2
+}
+
+/**
+ * @brief Xóa cờ ngắt ghi EEPROM
+ */
+void EEPROM_ClearInterruptFlag(void) {
+    _def = 0;
 }
